@@ -1,0 +1,147 @@
+Trochilus III
+R0=ACC
+R1=Flags IE,IF1,IF2,UF,N,V,Z,C
+RE=LAH
+RF=Reserved
+
+     Xr ab
+     r=0-E  OP1=Rr OP2=#ab
+     r=F    OP1=R0 OP2=Rb
+
+LDR/STR     
+     0r (r=0-E)     OP_TYPE6
+     0F a=00xx bbbb LDR R0,Rb
+        a=01xx 1111 LDR RX,SP
+        
+        a=100x bbbb STR R0,Rb
+        a=110x 1111 STR R0,SPL
+        a=111x 1111 STR R0,SPH
+     
+AND  1r (r=0-F)     OP_TYPE1
+ORL  2r (r=0-F)     OP_TYPE2
+XOR  3r (r=0-F)     OP_TYPE3
+ADC  4r (r=0-F)     OP_TYPE4
+SBC  5r (r=0-F)     OP_TYPE4
+
+SHR  6r a=0xxx      OP_TYPE5
+INC     a=1xxx      OP_TYPE5
+
+POP  7r a=0xxx      OP_TYPE7
+PSH  7r a=1xxx      OP_TYPE7
+
+     7F             OP_TYPE6
+        00aa bbbb   LDR R0,(00ab)       
+        010a bbbb   LDR R0,(RX+ab)
+        011a bbbb   LDR R0,(RY+ab)
+        
+        10aa bbbb   STR R0,(00ab)       
+        110a bbbb   STR R0,(RX+ab)
+        111a bbbb   STR R0,(RY+ab)
+        
+            
+STR  7F    (00(ab[5:0])/10,(RX+ab)/11,(RY+ab)<=R0
+TSX/TXS 6E 
+   
+                 
+JBS  100sb JBS when s=1 else JBC Rel
+RET  101sX RET when s=0 else RETI do R1&=#ab
+JMP  1100P PP  PC<=rPP when p=0;
+DNZ  1101r PP  PC-PP when (Rr-1)!=0
+JSR  1110P PP  PCH=>(--SP),PCL=>(SP),PC<=PPP
+INT  1111r ab  INT To a000+b*2 when r!=0xF 
+NOP  1111F xx  NOP
+
+
+Trochilus IV
+R0=ACC
+R1=Flags IE,IF1,IF2,UF,N,V,Z,C
+RE=LAH
+RF=Reserved
+
+     Xr ab
+NOP                 OP_TYPE7
+
+     r=0-C  OP1=Rr      OP2=#ab
+     r=D    OP1=Flag    OP2=#ab
+     r=E    OP1=Acc     OP2=Rb
+     r=F    OP1=Acc     OP2=#ab
+
+AND  0r (r=0-F)     OP_TYPE1
+ORL  1r (r=0-F)     OP_TYPE2
+XOR  2r (r=0-F)     OP_TYPE3
+ADC  3r (r=0-F)     OP_TYPE4
+
+        (r=0-D) 
+SHR  4r a=0xxx      OP_TYPE5
+INC     a=1xxx      OP_TYPE5
+LDR  4F Acc=#ab
+
+SBC  5r (r=0-E)     OP_TYPE4
+
+LDR  6r             OP_TYPE6
+     r=0-D  Rr<#ab          
+     r=E    ACC<- Rb
+     r=F    Acc<- (ab)/(SP)/(RX+ab)/(RY+ab)
+                      =<POP>
+
+STR  7r             OP_TYPE7
+     r=0-D  Acc->Rr
+     r=E    Acc<- Select by Rb RXH/RXL/RYH/RYL/SPH/SPL
+            Acc-> Select by Rb RXH/RXL/RYH/RYL/SPH/SPL
+     r=F    Acc-> (ab)/(SP)/(RX+ab)/(RY+ab)
+                      =<PSH>
+                 
+JBS  100sb JBS when s=1 else JBC Rel
+RET  101sX RET when s=0 else RETI do R1&=#ab
+JMP  1100P PP  PC<=rPP when p=0;
+DNZ  1101r PP  PC-PP when (Rr-1)!=0
+JSR  1110P PP  PCH=>(--SP),PCL=>(SP),PC<=PPP
+INT  1111r ab  INT To a000+b*2 when r!=0xF 
+NOP  1111F xx  NOP
+
+Trochilus V
+R0=ACC
+Flags IE,IF1,IF2,UF,N,V,Z,C
+RE=LAH
+RF=Reserved
+
+     Xr ab
+NOP                 OP_TYPE7
+
+     r=0-7  OP1=Rr      OP2=#ab
+     r=1000 OP1=Acc     OP2=#ab
+     r=1001 OP1=Flags   OP2=#ab
+     r=101x OP1=Acc     OP2=Rb
+     r=11xx OP1=Acc     OP2=(Ex-Ram)
+     
+
+AND  0r (r=0-F)     OP_TYPE1
+ORL  1r (r=0-F)     OP_TYPE2
+XOR  2r (r=0-F)     OP_TYPE3
+ADC  3r (r=0-F)     OP_TYPE4
+
+        (r=0-8) 
+SHR  4r a=0xxx      OP_TYPE5
+INC     a=1xxx      OP_TYPE5
+
+SBC  5r (r=0-F)     OP_TYPE4
+
+LDR  6r             OP_TYPE6
+
+     r=11xx    Acc<- (ab)/(SP)/(RX+ab)/(RY+ab)
+                         =<POP>
+
+STR  7r             OP_TYPE7
+     r=0-9  Acc->Rr
+     r=101x Acc<- Select by Rb RXH/RXL/RYH/RYL/SPH/SPL
+            Acc-> Select by Rb RXH/RXL/RYH/RYL/SPH/SPL
+     r=F    Acc-> (ab)/(SP)/(RX+ab)/(RY+ab)
+                      =<PSH>
+                 
+JBS  100sb JBS when s=1 else JBC Rel
+RET  101sX RET when s=0 else RETI do R1&=#ab
+JMP  1100P PP  PC<=rPP when p=0;
+DNZ  1101r PP  PC-PP when (Rr-1)!=0
+JSR  1110P PP  PCH=>(--SP),PCL=>(SP),PC<=PPP
+INT  1111r ab  INT To a000+b*2 when r!=0xF 
+NOP  1111F xx  NOP
