@@ -1,4 +1,4 @@
-
+ 
 module QPU_V(
   input clk,reset,RDY,
   input [15:0]IR,
